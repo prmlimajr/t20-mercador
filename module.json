@@ -1,0 +1,52 @@
+{
+  "id": "t20-mercador",
+  "title": "T20 — Mercador",
+  "description": "Lojas de mercadores para Tormenta20: o mestre transforma um ator/token em mercador (nome da loja, retrato do vendedor, categorias de itens à venda, margem de preço), os jogadores compram com carrinho e vendem seus itens pela metade do preço. O mestre vê os carrinhos dos jogadores e pode aplicar descontos.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "Paulo Lima"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "tormenta20",
+        "type": "system",
+        "compatibility": {
+          "minimum": "1.6.7"
+        }
+      }
+    ],
+    "recommends": [
+      {
+        "id": "suplementos-de-arton",
+        "type": "module",
+        "reason": "Itens dos Suplementos de Arton também podem ser vendidos pelos mercadores."
+      }
+    ]
+  },
+  "socket": true,
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/mercador.css"
+  ],
+  "languages": [
+    {
+      "lang": "pt-BR",
+      "name": "Português (Brasil)",
+      "path": "lang/pt-BR.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/pt-BR.json"
+    }
+  ]
+}

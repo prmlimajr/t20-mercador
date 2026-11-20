@@ -1,0 +1,266 @@
+<div class="mc-layout">
+	<header class="mc-cabecalho">
+		<img class="mc-retrato" src="{{cfg.imagem}}" alt="">
+		<div class="mc-titulo">
+			<h2>{{cfg.nome}}</h2>
+			{{#if cfg.saudacao}}<p class="mc-saudacao">“{{cfg.saudacao}}”</p>{{/if}}
+		</div>
+		{{#unless fechada}}
+		<div class="mc-comprador">
+			{{#if candidatos.length}}
+			<label>
+				<small>Negociando como</small>
+				<select class="mc-seletor-ator">
+					{{#each candidatos}}<option value="{{uuid}}" {{#if selecionado}}selected{{/if}}>{{nome}}</option>{{/each}}
+				</select>
+			</label>
+			<div class="mc-carteira"><small>Carteira</small><strong><i class="fa-solid fa-coins"></i> {{carteira}}</strong></div>
+			{{else}}
+			<p class="mc-nota">Você não controla nenhum personagem para negociar.</p>
+			{{/if}}
+		</div>
+		{{/unless}}
+	</header>
+
+	{{#if fechada}}
+	<div class="mc-centro">
+		<i class="fa-solid fa-door-closed mc-icone-grande"></i>
+		<p>A loja está fechada no momento.</p>
+	</div>
+	{{else}}
+
+	<nav class="mc-abas">
+		{{#each abas}}
+		<button type="button" class="mc-aba {{#if selecionado}}selecionado{{/if}}" data-action="modo" data-valor="{{id}}"><i class="{{icone}}"></i> {{nome}}</button>
+		{{/each}}
+	</nav>
+
+	<section class="mc-conteudo">
+	{{!-- ==================== Comprar ==================== --}}
+	{{#if comprar}}
+		{{#if carrinhosJogadores}}
+		<details class="mc-carrinhos" open>
+			<summary><i class="fa-solid fa-users"></i> Carrinhos dos jogadores <small>(o desconto vale para a próxima compra de cada um)</small></summary>
+			{{#if carrinhosJogadores.length}}
+			<div class="mc-carrinhos-lista">
+				{{#each carrinhosJogadores}}
+				<div class="mc-carrinho-jogador {{#if vazio}}vazio{{/if}}">
+					<span class="mc-jogador"><i class="fa-solid fa-circle" style="color: {{cor}}"></i> <strong>{{nome}}</strong> <small>{{ator}}</small></span>
+					<span class="mc-jogador-itens">{{#if vazio}}<em>carrinho vazio</em>{{else}}{{itens}}{{/if}}</span>
+					<span class="mc-jogador-valores">
+						<small>Carteira {{carteira}}</small>
+						<small>Subtotal {{subtotal}}</small>
+						<strong class="{{#if semDinheiro}}mc-alerta{{/if}}">Total {{total}}</strong>
+					</span>
+					<label class="mc-desconto" title="Desconto no carrinho deste jogador">
+						<i class="fa-solid fa-tag"></i>
+						<input type="number" min="0" max="100" step="1" value="{{desconto}}" data-desconto="{{id}}"> %
+					</label>
+				</div>
+				{{/each}}
+			</div>
+			{{else}}
+			<p class="mc-nota">Nenhum jogador conectado.</p>
+			{{/if}}
+		</details>
+		{{/if}}
+
+		<div class="mc-bolsa">
+			<div class="mc-bolsa-valor"><small>Subtotal</small><strong>{{subtotal}}</strong></div>
+			{{#if desconto}}<div class="mc-bolsa-valor mc-desconto-valor"><small>Desconto ({{desconto}}%)</small><strong>−{{valorDesconto}}</strong></div>{{/if}}
+			<div class="mc-bolsa-valor"><small>Total</small><strong>{{total}}</strong></div>
+			<div class="mc-bolsa-valor mc-saldo {{#if negativo}}mc-alerta{{/if}}"><small>Restará</small><strong><i class="fa-solid fa-coins"></i> {{restante}}</strong></div>
+			<div class="mc-bolsa-acoes">
+				{{#if carrinho.length}}<button type="button" class="mc-secundario" data-action="esvaziar"><i class="fa-solid fa-trash"></i> Esvaziar</button>{{/if}}
+				<button type="button" class="mc-primario" data-action="finalizar" data-total="{{totalTC}}" {{#unless podeFinalizar}}disabled{{/unless}}>
+					{{#if ocupado}}<i class="fa-solid fa-spinner fa-spin"></i>{{else}}<i class="fa-solid fa-cart-shopping"></i>{{/if}} Finalizar compra
+				</button>
+			</div>
+			{{#if carrinho.length}}
+			<div class="mc-carrinho">
+				{{#each carrinho}}
+				<span class="mc-carrinho-item">
+					<button type="button" class="mc-link" data-action="focar" data-uuid="{{uuid}}">{{nome}}{{#if multiplo}} ×{{qtd}}{{/if}}</button>
+					<small>{{total}}</small>
+					<button type="button" class="mc-mini" data-action="carrinho" data-uuid="{{uuid}}" data-delta="-1" title="Tirar um">−</button>
+				</span>
+				{{/each}}
+			</div>
+			{{else}}
+			<p class="mc-nota">Escolha os itens e adicione ao carrinho. A compra só acontece ao finalizar.</p>
+			{{/if}}
+			{{#if removidos}}<p class="mc-nota mc-alerta">{{removidos}} item(ns) do carrinho não estão mais à venda e foram ignorados.</p>{{/if}}
+		</div>
+
+		{{#if semItens}}
+		<p class="mc-vazio">{{cfg.nome}} não tem nada à venda.{{#if gm}} Escolha as categorias em <em>Configurar</em> ou coloque itens no inventário do ator.{{/if}}</p>
+		{{else}}
+		<div class="mc-filtros">
+			<div class="mc-navegacao">
+				<div class="mc-chips">
+					{{#each tipos}}<button type="button" class="mc-chip {{#if selecionado}}selecionado{{/if}}" data-action="tipo" data-valor="{{nome}}">{{nome}}</button>{{/each}}
+				</div>
+				{{#if categorias.length}}
+				<div class="mc-chips mc-categorias">
+					{{#each categorias}}<button type="button" class="mc-chip {{#if selecionado}}selecionado{{/if}}" data-action="categoria" data-valor="{{nome}}">{{nome}} <small>{{qtd}}</small></button>{{/each}}
+				</div>
+				{{/if}}
+			</div>
+			<input type="search" class="mc-filtro" placeholder="Filtrar…" value="{{filtro}}">
+		</div>
+
+		<div class="mc-duas">
+			<div class="mc-lista mc-cards">
+				{{#each cards}}
+				<button type="button" class="mc-card {{#if qtd}}selecionado{{/if}} {{#if foco}}foco{{/if}} {{#if caro}}caro{{/if}}"
+					data-action="focar" data-uuid="{{uuid}}" data-busca="{{busca}}">
+					<img src="{{img}}" alt="">
+					<span class="mc-card-texto">
+						<span class="mc-card-nome">{{nome}}{{#if qtd}} <span class="mc-badge">×{{qtd}}</span>{{/if}}</span>
+						<span class="mc-card-sub">{{sub}}</span>
+					</span>
+				</button>
+				{{/each}}
+			</div>
+			<aside class="mc-info">
+				{{#if info}}
+				<h3><img src="{{info.img}}" alt=""> {{info.nome}}</h3>
+				<div class="mc-compra">
+					<span class="mc-preco">{{info.preco}}{{#if info.pacote}} <small>(pacote com {{info.pacote}})</small>{{/if}}{{#if info.estoque}} <small>· {{info.estoque}} em estoque</small>{{/if}}</span>
+					<button type="button" class="mc-mini" data-action="carrinho" data-uuid="{{info.uuid}}" data-delta="-1" {{#unless info.podeRemover}}disabled{{/unless}} title="Tirar um">−</button>
+					<strong class="mc-qtd">{{info.qtd}}</strong>
+					<button type="button" class="mc-primario mc-comprar" data-action="carrinho" data-uuid="{{info.uuid}}" data-delta="1" {{#unless info.podeAdicionar}}disabled title="{{info.motivo}}"{{/unless}}>
+						<i class="fa-solid fa-cart-plus"></i> Adicionar
+					</button>
+				</div>
+				{{#if info.stats.length}}<dl class="mc-dados">{{#each info.stats}}<dt>{{rotulo}}</dt><dd>{{valor}}</dd>{{/each}}</dl>{{/if}}
+				{{#if info.descricao}}<div class="mc-descricao">{{{info.descricao}}}</div>{{/if}}
+				{{else}}
+				<p class="mc-vazio">Clique em um item para ver os detalhes e colocá-lo no carrinho.</p>
+				{{/if}}
+			</aside>
+		</div>
+		{{/if}}
+	{{/if}}
+
+	{{!-- ==================== Vender ==================== --}}
+	{{#if vender}}
+		<div class="mc-bolsa">
+			<div class="mc-bolsa-valor"><small>O mercador paga</small><strong>{{taxa}}% do preço</strong></div>
+			<div class="mc-bolsa-valor"><small>Você recebe</small><strong>+{{totalVenda}}</strong></div>
+			<div class="mc-bolsa-valor mc-saldo"><small>Ficará com</small><strong><i class="fa-solid fa-coins"></i> {{depois}}</strong></div>
+			<div class="mc-bolsa-acoes">
+				{{#if sacola.length}}<button type="button" class="mc-secundario" data-action="limparSacola"><i class="fa-solid fa-xmark"></i> Limpar</button>{{/if}}
+				<button type="button" class="mc-primario" data-action="vender" data-total="{{totalTC}}" {{#unless podeVender}}disabled{{/unless}}>
+					{{#if ocupado}}<i class="fa-solid fa-spinner fa-spin"></i>{{else}}<i class="fa-solid fa-hand-holding-dollar"></i>{{/if}} Vender
+				</button>
+			</div>
+			{{#if sacola.length}}
+			<div class="mc-carrinho">
+				{{#each sacola}}
+				<span class="mc-carrinho-item">
+					<button type="button" class="mc-link" data-action="focar" data-id="{{id}}">{{nome}}{{#if multiplo}} ×{{qtd}}{{/if}}</button>
+					<small>{{total}}</small>
+					<button type="button" class="mc-mini" data-action="sacola" data-id="{{id}}" data-delta="-1" title="Tirar um">−</button>
+				</span>
+				{{/each}}
+			</div>
+			{{else}}
+			<p class="mc-nota">Marque os itens do seu inventário que quer vender.</p>
+			{{/if}}
+		</div>
+
+		{{#if semItens}}
+		<p class="mc-vazio">{{#if comprador}}{{comprador.nome}} não tem itens que o mercador compre.{{else}}Escolha um personagem.{{/if}}</p>
+		{{else}}
+		<div class="mc-filtros">
+			<span class="mc-nota">Inventário de <strong>{{comprador.nome}}</strong></span>
+			<input type="search" class="mc-filtro" placeholder="Filtrar…" value="{{filtro}}">
+		</div>
+		<div class="mc-duas">
+			<div class="mc-lista mc-cards">
+				{{#each cards}}
+				<button type="button" class="mc-card {{#if qtd}}selecionado{{/if}} {{#if foco}}foco{{/if}}" data-action="focar" data-id="{{id}}" data-busca="{{busca}}">
+					<img src="{{img}}" alt="">
+					<span class="mc-card-texto">
+						<span class="mc-card-nome">{{nome}}{{#if qtd}} <span class="mc-badge">×{{qtd}}</span>{{/if}}</span>
+						<span class="mc-card-sub">{{sub}}</span>
+					</span>
+				</button>
+				{{/each}}
+			</div>
+			<aside class="mc-info">
+				{{#if info}}
+				<h3><img src="{{info.img}}" alt=""> {{info.nome}}</h3>
+				<div class="mc-compra">
+					<span class="mc-preco">{{info.preco}} <small>cada{{#if info.multiplo}} · você tem {{info.tem}}{{/if}}</small></span>
+					<button type="button" class="mc-mini" data-action="sacola" data-id="{{info.id}}" data-delta="-1" {{#unless info.podeRemover}}disabled{{/unless}} title="Tirar um">−</button>
+					<strong class="mc-qtd">{{info.qtd}}</strong>
+					<button type="button" class="mc-mini" data-action="sacola" data-id="{{info.id}}" data-delta="1" {{#unless info.podeAdicionar}}disabled{{/unless}} title="Mais um">+</button>
+					{{#if info.multiplo}}<button type="button" class="mc-secundario mc-comprar" data-action="sacolaTudo" data-id="{{info.id}}">Todos</button>{{/if}}
+				</div>
+				{{#if info.equipado}}<p class="mc-nota mc-alerta"><i class="fa-solid fa-triangle-exclamation"></i> Este item está equipado.</p>{{/if}}
+				{{#if info.stats.length}}<dl class="mc-dados">{{#each info.stats}}<dt>{{rotulo}}</dt><dd>{{valor}}</dd>{{/each}}</dl>{{/if}}
+				{{#if info.descricao}}<div class="mc-descricao">{{{info.descricao}}}</div>{{/if}}
+				{{else}}
+				<p class="mc-vazio">Clique em um item do seu inventário para ver por quanto o mercador compra.</p>
+				{{/if}}
+			</aside>
+		</div>
+		{{/if}}
+	{{/if}}
+
+	{{!-- ==================== Configurar (mestre) ==================== --}}
+	{{#if config}}
+		<div class="mc-config">
+			<div class="mc-config-topo">
+				<div class="mc-config-imagem">
+					<img class="mc-config-retrato" src="{{cfg.imagem}}" alt="">
+					<button type="button" class="mc-secundario" data-action="escolherImagem"><i class="fa-solid fa-image"></i> Imagem do vendedor</button>
+					<input type="hidden" name="imagem" value="{{cfg.imagem}}">
+				</div>
+				<div class="mc-config-campos">
+					<label class="mc-interruptor"><input type="checkbox" name="ativo" {{#if cfg.ativo}}checked{{/if}}> <strong>Loja aberta</strong> <small>({{ator}} vira um mercador: duplo clique no token abre a loja)</small></label>
+					<label>Nome da loja <input type="text" name="nome" value="{{cfg.nome}}" placeholder="{{ator}}"></label>
+					<label>Fala do vendedor <input type="text" name="saudacao" value="{{cfg.saudacao}}"></label>
+					<div class="mc-config-linha">
+						<label>Preço de venda <span><input type="number" name="margem" min="0" max="1000" step="5" value="{{cfg.margem}}"> % do preço de tabela</span></label>
+						<label>Paga pelos itens <span><input type="number" name="taxaCompra" min="0" max="100" step="5" value="{{cfg.taxaCompra}}"> % do preço</span></label>
+					</div>
+					<label class="mc-interruptor"><input type="checkbox" name="compra" {{#if cfg.compra}}checked{{/if}}> Compra itens dos jogadores</label>
+					<label class="mc-interruptor"><input type="checkbox" name="revender" {{#if cfg.revender}}checked{{/if}}> Itens comprados dos jogadores vão para o estoque (e podem ser revendidos)</label>
+					{{#unless jogadoresVeem}}
+					<label class="mc-interruptor"><input type="checkbox" name="liberar" checked> Dar permissão <em>Limitada</em> aos jogadores (necessária para abrirem a loja pelo token)</label>
+					{{/unless}}
+				</div>
+			</div>
+
+			<h4>O que o mercador vende</h4>
+			<div class="mc-chips mc-perfis">
+				{{#each perfis}}<button type="button" class="mc-chip" data-action="perfil" data-perfil="{{id}}" title="Shift+clique soma às categorias marcadas"><i class="{{icone}}"></i> {{nome}}</button>{{/each}}
+			</div>
+			<div class="mc-grupos">
+				{{#each grupos}}
+				<fieldset>
+					<legend>{{tipo}}</legend>
+					{{#each categorias}}
+					<label><input type="checkbox" name="categoria" value="{{nome}}" {{#if marcada}}checked{{/if}}> {{nome}}</label>
+					{{/each}}
+				</fieldset>
+				{{/each}}
+			</div>
+			<p class="mc-nota">
+				Além das categorias, o mercador vende os itens do inventário de <strong>{{ator}}</strong> (com estoque limitado).
+				{{#if sintetico}}Este token não está vinculado ao ator: a configuração e o estoque valem só para ele.{{/if}}
+				{{#if suplementos}}Itens dos Suplementos de Arton incluídos.{{/if}}
+			</p>
+
+			<div class="mc-config-rodape">
+				<button type="button" class="mc-secundario" data-action="abrirFicha"><i class="fa-solid fa-user"></i> Ficha / inventário</button>
+				<button type="button" class="mc-primario" data-action="salvarConfig"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+			</div>
+		</div>
+	{{/if}}
+	</section>
+	{{/if}}
+</div>

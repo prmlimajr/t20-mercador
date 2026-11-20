@@ -1,0 +1,325 @@
+/* T20 — Mercador (visual baseado na loja do T20 — Construtor de Ficha) */
+
+.t20-mercador {
+	--mc-fundo: #b52d35;
+	--mc-marrom: #6f3c27;
+	--mc-ouro: #f6d57a;
+	--mc-vermelho: #3f0f12;
+	--mc-fonte-titulo: "T20CF Tormenta", "Tormenta 20", "Tormenta20", "Modesto Condensed", serif;
+	--mc-vermelho-claro: rgba(63, 15, 18, 0.55);
+	--mc-ouro-claro: rgba(246, 213, 122, 0.14);
+	--mc-borda: rgba(63, 15, 18, 0.7);
+	--mc-fundo-card: rgba(63, 15, 18, 0.35);
+	--mc-texto-suave: rgba(255, 236, 190, 0.85);
+	--mc-painel: rgba(40, 8, 10, 0.45);
+}
+
+.application.t20-mercador,
+.t20-mercador .window-content {
+	background: var(--mc-fundo);
+	color: #fff;
+}
+.t20-mercador .window-content { padding: 0; overflow: hidden; }
+
+.t20-mercador h2,
+.t20-mercador .mc-info h3,
+.t20-mercador h4 {
+	font-family: var(--mc-fonte-titulo);
+	color: #fff;
+	-webkit-text-stroke: 2px var(--mc-vermelho);
+	paint-order: stroke fill;
+	text-shadow: 0 1px 2px var(--mc-vermelho);
+	letter-spacing: 0.02em;
+}
+.t20-mercador h4 { -webkit-text-stroke-width: 1.5px; margin: 12px 0 6px; border-bottom: 1px solid var(--mc-borda); font-size: 18px; }
+
+.t20-mercador .mc-layout { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+
+/* ---------- Cabeçalho: retrato e nome da loja ---------- */
+.t20-mercador .mc-cabecalho {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 10px 16px;
+	border-bottom: 1px solid var(--mc-borda);
+	background: linear-gradient(90deg, rgba(40, 8, 10, 0.55), rgba(40, 8, 10, 0.15));
+}
+.t20-mercador .mc-retrato {
+	width: 92px;
+	height: 92px;
+	flex: none;
+	object-fit: cover;
+	object-position: top;
+	border: 3px solid var(--mc-ouro);
+	border-radius: 50%;
+	background: var(--mc-painel);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+.t20-mercador .mc-titulo { flex: 1; min-width: 0; }
+.t20-mercador .mc-titulo h2 { margin: 0; border: none; font-size: 32px; line-height: 1.1; }
+.t20-mercador .mc-saudacao {
+	margin: 4px 0 0;
+	padding: 4px 10px;
+	font-style: italic;
+	color: var(--mc-texto-suave);
+	border-left: 3px solid var(--mc-ouro);
+	background: var(--mc-vermelho-claro);
+	border-radius: 0 6px 6px 0;
+}
+.t20-mercador .mc-comprador { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex: none; }
+.t20-mercador .mc-comprador label { display: flex; flex-direction: column; gap: 2px; }
+.t20-mercador .mc-comprador small,
+.t20-mercador .mc-carteira small { color: var(--mc-texto-suave); font-size: 11px; }
+.t20-mercador .mc-comprador select { min-width: 180px; background: var(--mc-painel); color: #fff; border-color: var(--mc-borda); }
+.t20-mercador .mc-comprador select option { color: #000; }
+.t20-mercador .mc-carteira { display: flex; flex-direction: column; align-items: flex-end; }
+.t20-mercador .mc-carteira strong { font-size: 20px; color: var(--mc-ouro); }
+
+/* ---------- Abas ---------- */
+.t20-mercador .mc-abas { display: flex; gap: 4px; padding: 8px 16px 0; border-bottom: 1px solid var(--mc-borda); }
+.t20-mercador .mc-aba {
+	flex: none;
+	width: auto;
+	padding: 4px 14px;
+	border: 1px solid var(--mc-borda);
+	border-bottom: none;
+	border-radius: 6px 6px 0 0;
+	background: var(--mc-fundo-card);
+	color: #fff;
+}
+.t20-mercador .mc-aba.selecionado { background: var(--mc-vermelho); border-color: var(--mc-ouro); color: var(--mc-ouro); }
+.t20-mercador .mc-aba:not(.selecionado):hover { border-color: var(--mc-ouro); }
+
+.t20-mercador .mc-conteudo {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	padding: 12px 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.t20-mercador .mc-conteudo > * { flex-shrink: 0; }
+.t20-mercador .mc-conteudo > .mc-duas { flex: 1; flex-shrink: 1; min-height: 260px; }
+
+.t20-mercador .mc-centro { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.t20-mercador .mc-icone-grande { font-size: 48px; color: var(--mc-ouro); }
+
+/* ---------- Botões ---------- */
+.t20-mercador button { color: #fff; }
+.t20-mercador button.mc-primario {
+	flex: none;
+	width: auto;
+	background: var(--mc-vermelho);
+	border: 1px solid var(--mc-ouro);
+	color: var(--mc-ouro);
+}
+.t20-mercador button.mc-primario:hover:not(:disabled) { background: #5a1a1f; }
+.t20-mercador button.mc-secundario {
+	flex: none;
+	width: auto;
+	background: var(--mc-fundo-card);
+	border: 1px solid var(--mc-borda);
+}
+.t20-mercador button.mc-secundario:hover { border-color: var(--mc-ouro); }
+.t20-mercador button:disabled { opacity: 0.5; }
+.t20-mercador .mc-mini { flex: none; width: 24px; min-width: 24px; height: 24px; line-height: 1; padding: 0; margin: 0; background: var(--mc-fundo-card); border: 1px solid var(--mc-borda); }
+.t20-mercador button.mc-link {
+	width: auto;
+	padding: 0;
+	border: none;
+	background: none;
+	color: inherit;
+	text-decoration: underline dotted;
+}
+
+/* ---------- Bolsa (totais e carrinho) ---------- */
+.t20-mercador .mc-bolsa {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 20px;
+	padding: 8px 12px;
+	border: 1px solid var(--mc-borda);
+	border-radius: 6px;
+	background: var(--mc-ouro-claro);
+}
+.t20-mercador .mc-bolsa-valor { display: flex; flex-direction: column; }
+.t20-mercador .mc-bolsa-valor small { color: var(--mc-texto-suave); font-size: 11px; }
+.t20-mercador .mc-bolsa-valor strong { font-size: 16px; }
+.t20-mercador .mc-saldo strong { font-size: 22px; color: var(--mc-ouro); }
+.t20-mercador .mc-desconto-valor strong { color: #b6f0a0; }
+.t20-mercador .mc-bolsa-acoes { margin-left: auto; display: flex; gap: 6px; }
+.t20-mercador .mc-carrinho { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+.t20-mercador .mc-carrinho-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 4px 2px 10px;
+	border: 1px solid var(--mc-marrom);
+	border-radius: 14px;
+	background: rgba(0, 0, 0, 0.25);
+}
+.t20-mercador .mc-carrinho-item small { color: var(--mc-texto-suave); }
+.t20-mercador .mc-alerta,
+.t20-mercador .mc-saldo.mc-alerta strong { color: #ffd0a0 !important; }
+
+/* ---------- Carrinhos dos jogadores (mestre) ---------- */
+.t20-mercador .mc-carrinhos {
+	border: 1px solid var(--mc-ouro);
+	border-radius: 6px;
+	background: var(--mc-painel);
+	padding: 6px 10px;
+}
+.t20-mercador .mc-carrinhos summary { cursor: pointer; font-weight: bold; color: var(--mc-ouro); }
+.t20-mercador .mc-carrinhos summary small { font-weight: normal; color: var(--mc-texto-suave); }
+.t20-mercador .mc-carrinhos-lista { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; max-height: 180px; overflow-y: auto; }
+.t20-mercador .mc-carrinho-jogador {
+	display: grid;
+	grid-template-columns: 170px 1fr auto auto;
+	align-items: center;
+	gap: 10px;
+	padding: 4px 8px;
+	border: 1px solid var(--mc-borda);
+	border-radius: 6px;
+	background: var(--mc-fundo-card);
+}
+.t20-mercador .mc-carrinho-jogador.vazio { opacity: 0.7; }
+.t20-mercador .mc-jogador small { display: block; color: var(--mc-texto-suave); }
+.t20-mercador .mc-jogador-itens { font-size: 12px; }
+.t20-mercador .mc-jogador-valores { display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; }
+.t20-mercador .mc-jogador-valores small { color: var(--mc-texto-suave); }
+.t20-mercador .mc-desconto { display: flex; align-items: center; gap: 4px; white-space: nowrap; color: var(--mc-ouro); }
+.t20-mercador .mc-desconto input { width: 56px; text-align: right; background: var(--mc-painel); color: #fff; border-color: var(--mc-ouro); }
+
+/* ---------- Filtros ---------- */
+.t20-mercador .mc-filtros { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.t20-mercador .mc-navegacao { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.t20-mercador .mc-filtro { flex: 0 0 220px; margin-left: auto; }
+.t20-mercador .mc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.t20-mercador .mc-chip {
+	flex: none;
+	width: auto;
+	padding: 2px 10px;
+	border-radius: 14px;
+	border: 1px solid var(--mc-borda);
+	background: var(--mc-fundo-card);
+}
+.t20-mercador .mc-chip small { color: var(--mc-texto-suave); }
+.t20-mercador .mc-chip.selecionado { background: var(--mc-vermelho); border-color: var(--mc-ouro); color: var(--mc-ouro); }
+.t20-mercador .mc-chip:not(.selecionado):hover { border-color: var(--mc-ouro); }
+
+/* ---------- Lista + painel ---------- */
+.t20-mercador .mc-duas {
+	display: grid;
+	grid-template-columns: minmax(240px, 1fr) minmax(300px, 1.2fr);
+	gap: 12px;
+	min-height: 0;
+}
+.t20-mercador .mc-lista,
+.t20-mercador .mc-info { overflow-y: auto; min-height: 0; max-height: 100%; }
+.t20-mercador .mc-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 6px;
+	align-content: start;
+}
+.t20-mercador .mc-card {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 8px;
+	text-align: left;
+	height: auto;
+	min-height: 52px;
+	padding: 6px 8px;
+	background: var(--mc-fundo-card);
+	border: 1px solid var(--mc-borda);
+	border-radius: 6px;
+	line-height: 1.2;
+	color: #fff;
+}
+.t20-mercador .mc-card[hidden] { display: none; }
+.t20-mercador .mc-card img { width: 36px; height: 36px; border: none; flex: none; }
+.t20-mercador .mc-card-texto { display: flex; flex-direction: column; min-width: 0; }
+.t20-mercador .mc-card-nome { font-weight: bold; }
+.t20-mercador .mc-card-sub { font-size: 11px; color: var(--mc-texto-suave); white-space: normal; }
+.t20-mercador .mc-card.selecionado { border-color: var(--mc-ouro); background: var(--mc-vermelho-claro); }
+.t20-mercador .mc-card:not(.selecionado):hover { border-color: var(--mc-ouro); }
+.t20-mercador .mc-card.foco { outline: 1px dashed var(--mc-ouro); }
+.t20-mercador .mc-card.caro { opacity: 0.45; }
+.t20-mercador .mc-badge {
+	display: inline-block;
+	padding: 0 6px;
+	border-radius: 10px;
+	background: var(--mc-ouro);
+	color: var(--mc-marrom);
+	font-size: 11px;
+}
+
+.t20-mercador .mc-info {
+	border: 1px solid var(--mc-borda);
+	border-radius: 6px;
+	padding: 10px 12px;
+	background: var(--mc-painel);
+}
+.t20-mercador .mc-info h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; border: none; font-size: 22px; }
+.t20-mercador .mc-info h3 img { width: 36px; height: 36px; border: none; }
+.t20-mercador .mc-compra { display: flex; align-items: center; gap: 8px; margin: 6px 0 10px; }
+.t20-mercador .mc-preco { flex: 1; font-size: 18px; font-weight: bold; color: var(--mc-ouro); }
+.t20-mercador .mc-preco small { font-size: 11px; color: var(--mc-texto-suave); font-weight: normal; }
+.t20-mercador .mc-qtd { min-width: 20px; text-align: center; }
+.t20-mercador .mc-dados { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0 0 8px; }
+.t20-mercador .mc-dados dt { font-weight: bold; color: var(--mc-ouro); }
+.t20-mercador .mc-dados dd { margin: 0; line-height: 1.35; }
+.t20-mercador .mc-descricao { font-size: 13px; }
+.t20-mercador .mc-descricao p { margin: 4px 0; }
+.t20-mercador .mc-descricao a { color: var(--mc-ouro); }
+
+.t20-mercador .mc-vazio { color: var(--mc-texto-suave); font-style: italic; }
+.t20-mercador .mc-nota { color: var(--mc-texto-suave); font-size: 12px; margin: 2px 0; }
+
+/* ---------- Configuração ---------- */
+.t20-mercador .mc-config { display: flex; flex-direction: column; gap: 8px; }
+.t20-mercador .mc-config-topo { display: flex; gap: 16px; align-items: flex-start; }
+.t20-mercador .mc-config-imagem { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: none; }
+.t20-mercador .mc-config-retrato {
+	width: 140px;
+	height: 140px;
+	object-fit: cover;
+	object-position: top;
+	border: 3px solid var(--mc-ouro);
+	border-radius: 8px;
+	background: var(--mc-painel);
+}
+.t20-mercador .mc-config-campos { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.t20-mercador .mc-config-campos > label:not(.mc-interruptor),
+.t20-mercador .mc-config-linha label { display: flex; flex-direction: column; gap: 2px; font-weight: bold; }
+.t20-mercador .mc-config-linha { display: flex; gap: 16px; }
+.t20-mercador .mc-config-linha span { display: flex; align-items: center; gap: 6px; font-weight: normal; }
+.t20-mercador .mc-config-linha input { width: 70px; }
+.t20-mercador .mc-config input[type="text"],
+.t20-mercador .mc-config input[type="number"] { background: var(--mc-painel); color: #fff; border-color: var(--mc-borda); }
+.t20-mercador .mc-interruptor { display: flex; align-items: center; gap: 6px; }
+.t20-mercador .mc-interruptor small { color: var(--mc-texto-suave); }
+.t20-mercador .mc-grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.t20-mercador .mc-grupos fieldset {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	border: 1px solid var(--mc-borda);
+	border-radius: 6px;
+	background: var(--mc-fundo-card);
+	margin: 0;
+}
+.t20-mercador .mc-grupos legend { color: var(--mc-ouro); font-weight: bold; padding: 0 4px; }
+.t20-mercador .mc-grupos label { display: flex; align-items: center; gap: 6px; }
+.t20-mercador .mc-config-rodape { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+
+/* ---------- Chat ---------- */
+.t20-mercador-chat h3 { font-size: 14px; margin: 0 0 4px; }
+.t20-mercador-chat ul { margin: 0 0 4px; padding-left: 18px; }
+.t20-mercador-chat p { margin: 2px 0; }
+
+/* ---------- Botão no HUD do token ---------- */
+#token-hud .control-icon.t20-mercador-hud.ativo { border-color: #f6d57a; color: #f6d57a; }

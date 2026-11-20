@@ -1,0 +1,10 @@
+{
+	"T20MC": {
+		"Config": {
+			"suplementos": {
+				"Nome": "Itens dos Suplementos de Arton",
+				"Dica": "Inclui no catálogo dos mercadores os itens comuns (não mágicos) dos Suplementos de Arton, quando o módulo estiver ativo."
+			}
+		}
+	}
+}
