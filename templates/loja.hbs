@@ -65,30 +65,11 @@
 		</details>
 		{{/if}}
 
-		<div class="mc-bolsa">
-			<div class="mc-bolsa-valor"><small>Subtotal</small><strong>{{subtotal}}</strong></div>
-			{{#if desconto}}<div class="mc-bolsa-valor mc-desconto-valor"><small>Desconto ({{desconto}}%)</small><strong>−{{valorDesconto}}</strong></div>{{/if}}
-			<div class="mc-bolsa-valor"><small>Total</small><strong>{{total}}</strong></div>
-			<div class="mc-bolsa-valor mc-saldo {{#if negativo}}mc-alerta{{/if}}"><small>Restará</small><strong><i class="fa-solid fa-coins"></i> {{restante}}</strong></div>
-			<div class="mc-bolsa-acoes">
-				{{#if carrinho.length}}<button type="button" class="mc-secundario" data-action="esvaziar"><i class="fa-solid fa-trash"></i> Esvaziar</button>{{/if}}
-				<button type="button" class="mc-primario" data-action="finalizar" data-total="{{totalTC}}" {{#unless podeFinalizar}}disabled{{/unless}}>
-					{{#if ocupado}}<i class="fa-solid fa-spinner fa-spin"></i>{{else}}<i class="fa-solid fa-cart-shopping"></i>{{/if}} Finalizar compra
-				</button>
-			</div>
-			{{#if carrinho.length}}
-			<div class="mc-carrinho">
-				{{#each carrinho}}
-				<span class="mc-carrinho-item">
-					<button type="button" class="mc-link" data-action="focar" data-uuid="{{uuid}}">{{nome}}{{#if multiplo}} ×{{qtd}}{{/if}}</button>
-					<small>{{total}}</small>
-					<button type="button" class="mc-mini" data-action="carrinho" data-uuid="{{uuid}}" data-delta="-1" title="Tirar um">−</button>
-				</span>
-				{{/each}}
-			</div>
-			{{else}}
-			<p class="mc-nota">Escolha os itens e adicione ao carrinho. A compra só acontece ao finalizar.</p>
-			{{/if}}
+		<div class="mc-barra-carrinho">
+			<button type="button" class="mc-primario mc-abrir-carrinho" data-action="abrirCarrinho">
+				<i class="fa-solid fa-cart-shopping"></i> Carrinho
+				{{#if qtdCarrinho}}<span class="mc-badge">{{qtdCarrinho}}</span> <span class="mc-abrir-total">{{total}}</span>{{/if}}
+			</button>
 			{{#if removidos}}<p class="mc-nota mc-alerta">{{removidos}} item(ns) do carrinho não estão mais à venda e foram ignorados.</p>{{/if}}
 		</div>
 
@@ -262,5 +243,49 @@
 		</div>
 	{{/if}}
 	</section>
+
+	{{#if comprar}}
+	<div class="mc-slideout-fundo {{#if carrinhoAberto}}aberto{{/if}}" data-action="fecharCarrinho"></div>
+	<aside class="mc-slideout {{#if carrinhoAberto}}aberto{{/if}}">
+		<header class="mc-slideout-topo">
+			<h3><i class="fa-solid fa-cart-shopping"></i> Carrinho</h3>
+			<button type="button" class="mc-mini" data-action="fecharCarrinho" title="Fechar"><i class="fa-solid fa-xmark"></i></button>
+		</header>
+		<div class="mc-carrinho-itens">
+			{{#each carrinho}}
+			<div class="mc-linha">
+				<img src="{{img}}" alt="">
+				<div class="mc-linha-texto">
+					<button type="button" class="mc-link" data-action="focar" data-uuid="{{uuid}}">{{nome}}</button>
+					<small>{{preco}} cada{{#if estoque}} · {{estoque}} em estoque{{/if}}</small>
+				</div>
+				<div class="mc-linha-qtd">
+					<button type="button" class="mc-mini" data-action="carrinho" data-uuid="{{uuid}}" data-delta="-1" title="Tirar um">−</button>
+					<input type="number" class="mc-qtd-input" min="0" step="1" value="{{qtd}}" data-uuid="{{uuid}}">
+					<button type="button" class="mc-mini" data-action="carrinho" data-uuid="{{uuid}}" data-delta="1" {{#unless podeMais}}disabled{{/unless}} title="Mais um">+</button>
+				</div>
+				<strong class="mc-linha-total">{{total}}</strong>
+				<button type="button" class="mc-mini mc-remover" data-action="removerItem" data-uuid="{{uuid}}" title="Remover do carrinho"><i class="fa-solid fa-trash"></i></button>
+			</div>
+			{{else}}
+			<p class="mc-vazio">O carrinho está vazio. Escolha os itens e adicione ao carrinho.</p>
+			{{/each}}
+		</div>
+		<footer class="mc-slideout-rodape">
+			<dl class="mc-totais">
+				<dt>Subtotal</dt><dd>{{subtotal}}</dd>
+				{{#if desconto}}<dt>Desconto ({{desconto}}%)</dt><dd class="mc-desconto-valor">−{{valorDesconto}}</dd>{{/if}}
+				<dt>Total</dt><dd><strong>{{total}}</strong></dd>
+				<dt>Restará</dt><dd class="mc-saldo {{#if negativo}}mc-alerta{{/if}}"><i class="fa-solid fa-coins"></i> {{restante}}</dd>
+			</dl>
+			<div class="mc-slideout-acoes">
+				<button type="button" class="mc-secundario" data-action="esvaziar" {{#unless carrinho.length}}disabled{{/unless}}><i class="fa-solid fa-trash"></i> Esvaziar</button>
+				<button type="button" class="mc-primario" data-action="finalizar" data-total="{{totalTC}}" {{#unless podeFinalizar}}disabled{{/unless}}>
+					{{#if ocupado}}<i class="fa-solid fa-spinner fa-spin"></i>{{else}}<i class="fa-solid fa-bag-shopping"></i>{{/if}} Comprar
+				</button>
+			</div>
+		</footer>
+	</aside>
+	{{/if}}
 	{{/if}}
 </div>

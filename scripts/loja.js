@@ -55,6 +55,8 @@ export class LojaMercador extends HandlebarsApplicationMixin(ApplicationV2) {
 		this.sacola = new Map();
 		this.atorUuid = null;
 		this.ocupado = false;
+		/** O slideout do carrinho está aberto? */
+		this.carrinhoAberto = false;
 		this._html = new Map();
 	}
 
@@ -70,6 +72,9 @@ export class LojaMercador extends HandlebarsApplicationMixin(ApplicationV2) {
 			focar: LojaMercador.#focar,
 			carrinho: LojaMercador.#carrinho,
 			esvaziar: LojaMercador.#esvaziar,
+			removerItem: LojaMercador.#removerItem,
+			abrirCarrinho: LojaMercador.#abrirCarrinho,
+			fecharCarrinho: LojaMercador.#fecharCarrinho,
 			finalizar: LojaMercador.#finalizar,
 			sacola: LojaMercador.#sacola,
 			sacolaTudo: LojaMercador.#sacolaTudo,
@@ -85,7 +90,7 @@ export class LojaMercador extends HandlebarsApplicationMixin(ApplicationV2) {
 	static PARTS = {
 		main: {
 			template: `${TPL}/loja.hbs`,
-			scrollable: [".mc-lista", ".mc-info", ".mc-config", ".mc-carrinhos-lista"]
+			scrollable: [".mc-lista", ".mc-info", ".mc-config", ".mc-carrinhos-lista", ".mc-carrinho-itens"]
 		}
 	};
 
@@ -238,8 +243,14 @@ export class LojaMercador extends HandlebarsApplicationMixin(ApplicationV2) {
 			semItens: !ofertas.length,
 			info,
 			carrinho: conta.linhas.map((l) => ({
-				uuid: l.oferta.uuid, nome: l.oferta.nome, qtd: l.qtd, multiplo: l.qtd > 1, total: formatarTC(l.totalTC)
+				uuid: l.oferta.uuid, nome: l.oferta.nome, img: l.oferta.img, qtd: l.qtd,
+				preco: formatarTC(l.oferta.precoTC),
+				estoque: l.oferta.estoque,
+				total: formatarTC(l.totalTC),
+				podeMais: l.oferta.precoTC <= disponivel && (l.oferta.estoque === null || l.qtd < l.oferta.estoque)
 			})),
+			qtdCarrinho: conta.linhas.reduce((t, l) => t + l.qtd, 0),
+			carrinhoAberto: this.carrinhoAberto,
 			removidos: carrinho.itens.length - conta.linhas.length,
 			desconto,
 			subtotal: formatarTC(conta.subtotal),
@@ -382,6 +393,9 @@ export class LojaMercador extends HandlebarsApplicationMixin(ApplicationV2) {
 			aplicar();
 		}
 		el.querySelector(".mc-seletor-ator")?.addEventListener("change", (ev) => this.#trocarComprador(ev.target.value));
+		for (const input of el.querySelectorAll(".mc-qtd-input")) {
+			input.addEventListener("change", (ev) => this.#definirQtd(ev.target.dataset.uuid, Math.floor(Number(ev.target.value)) || 0));
+		}
 		for (const input of el.querySelectorAll("input[data-desconto]")) {
 			input.addEventListener("change", (ev) => this.#definirDesconto(ev.target.dataset.desconto, ev.target.value));
 		}
@@ -404,6 +418,7 @@ export class LojaMercador extends HandlebarsApplicationMixin(ApplicationV2) {
 
 	static #modo(event, target) {
 		this.modo = target.dataset.valor;
+		this.carrinhoAberto = false;
 		this.foco = null;
 		this.filtro = "";
 		this.render();
@@ -422,40 +437,76 @@ export class LojaMercador extends HandlebarsApplicationMixin(ApplicationV2) {
 
 	static #focar(event, target) {
 		this.foco = target.dataset.uuid ?? target.dataset.id;
+		if (target.closest(".mc-slideout")) this.carrinhoAberto = false;
 		this.render();
 	}
 
-	/** +1/−1 de um item no carrinho. */
-	static async #carrinho(event, target) {
-		const uuid = target.dataset.uuid;
-		const delta = Number(target.dataset.delta);
+	/** Mostra/esconde o slideout do carrinho sem re-renderizar (para a animação). */
+	#mostrarCarrinho(aberto) {
+		this.carrinhoAberto = aberto;
+		for (const el of this.element.querySelectorAll(".mc-slideout, .mc-slideout-fundo")) el.classList.toggle("aberto", aberto);
+	}
+
+	static #abrirCarrinho() {
+		this.#mostrarCarrinho(true);
+	}
+
+	static #fecharCarrinho() {
+		this.#mostrarCarrinho(false);
+	}
+
+	/** Define a quantidade de um item no carrinho (0 remove), validando estoque e carteira. */
+	async #definirQtd(uuid, novaQtd) {
 		const catalogo = await carregarCatalogo();
 		const cfg = this.cfg;
 		const oferta = resolverOferta(this.loja, cfg, catalogo, uuid);
 		const carrinho = carrinhoDe(game.user, this.loja);
 		const itens = carrinho.itens.map((i) => ({ ...i }));
 		let linha = itens.find((i) => i.uuid === uuid);
-		if (delta > 0) {
-			if (!oferta) return ui.notifications.warn("Este item não está mais à venda.");
-			const atual = linha?.qtd ?? 0;
-			if (oferta.estoque !== null && atual + delta > oferta.estoque) {
-				return ui.notifications.warn(`O mercador só tem ${oferta.estoque} ${oferta.nome}.`);
+		const atual = linha?.qtd ?? 0;
+		novaQtd = Math.max(0, novaQtd);
+		const salvar = () => salvarCarrinho(game.user, this.loja, { ator: this.atorUuid, itens: itens.filter((i) => i.qtd > 0) });
+		if (novaQtd > atual) {
+			if (!oferta) {
+				ui.notifications.warn("Este item não está mais à venda.");
+				return this.render();
+			}
+			if (oferta.estoque !== null && novaQtd > oferta.estoque) {
+				ui.notifications.warn(`O mercador só tem ${oferta.estoque} ${oferta.nome}.`);
+				return this.render();
 			}
 			if (!linha) itens.push(linha = { uuid, qtd: 0 });
-			linha.qtd += delta;
+			linha.qtd = novaQtd;
 			const ator = this.comprador;
 			const conta = totalCarrinho(this.loja, cfg, catalogo, { itens }, descontoDe(this.loja, game.user.id));
 			if (ator && conta.total > carteiraTC(ator)) {
-				return ui.notifications.warn(`Tibares insuficientes para comprar ${oferta.nome}.`);
+				ui.notifications.warn(`Tibares insuficientes para comprar ${oferta.nome}.`);
+				return this.render();
 			}
 		} else if (linha) {
-			linha.qtd = Math.max(0, linha.qtd + delta);
-		}
-		this.foco = uuid;
-		await salvarCarrinho(game.user, this.loja, { ator: this.atorUuid, itens: itens.filter((i) => i.qtd > 0) });
+			linha.qtd = novaQtd;
+		} else return;
+		await salvar();
+	}
+
+	/** +1/−1 de um item no carrinho. */
+	static async #carrinho(event, target) {
+		const uuid = target.dataset.uuid;
+		const atual = carrinhoDe(game.user, this.loja).itens.find((i) => i.uuid === uuid)?.qtd ?? 0;
+		if (!target.closest(".mc-slideout")) this.foco = uuid;
+		await this.#definirQtd(uuid, atual + Number(target.dataset.delta));
+	}
+
+	static async #removerItem(event, target) {
+		await this.#definirQtd(target.dataset.uuid, 0);
 	}
 
 	static async #esvaziar() {
+		const ok = await foundry.applications.api.DialogV2.confirm({
+			window: { title: this.cfg.nome },
+			content: "<p>Tirar todos os itens do carrinho?</p>"
+		});
+		if (!ok) return;
 		await salvarCarrinho(game.user, this.loja, { ator: this.atorUuid, itens: [] });
 	}
 
@@ -473,7 +524,10 @@ export class LojaMercador extends HandlebarsApplicationMixin(ApplicationV2) {
 		this.render();
 		const r = await pedir("comprar", { lojaUuid: this.loja.uuid, atorUuid: ator.uuid, itens: carrinho.itens, totalEsperado });
 		this.ocupado = false;
-		if (r.ok) ui.notifications.info(`Compra concluída: ${formatarTC(r.total)}.`);
+		if (r.ok) {
+			this.carrinhoAberto = false;
+			ui.notifications.info(`Compra concluída: ${formatarTC(r.total)}.`);
+		}
 		else ui.notifications.warn(r.erro);
 		this.render();
 	}
