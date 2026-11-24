@@ -35,6 +35,7 @@ Hooks.once("init", () => {
 Hooks.once("ready", () => {
 	registrarSocket();
 	patchDuploClique();
+	patchFichaDoMercador();
 	game.modules.get(MODULE_ID).api = { abrirLoja, configurarLoja, ehMercador, lerConfig, invalidarCatalogo };
 	// carrega o catálogo em segundo plano para a loja abrir rápido
 	setTimeout(() => carregarCatalogo().catch((err) => console.error(`${MODULE_ID} |`, err)), 2000);
@@ -63,6 +64,33 @@ function patchDuploClique() {
 	const original = proto._onClickLeft2;
 	proto._onClickLeft2 = function (event, ...args) {
 		return wrapper.call(this, (...a) => original.apply(this, a), event, ...args);
+	};
+}
+
+/**
+ * Jogador sem posse do mercador nunca vê a ficha dele (no T20, a ficha "Limitada", com as
+ * Anotações): ao tentar abri-la — duplo clique no token, diretório de atores etc. — abre a loja.
+ * Cobre os caminhos em que o Foundry abre a ficha sem passar por Token#_onClickLeft2.
+ */
+function patchFichaDoMercador() {
+	if (game.user.isGM) return;
+	const alvo = "foundry.appv1.sheets.ActorSheet.prototype.render";
+	const wrapper = function (wrapped, force, ...args) {
+		const actor = this.actor;
+		if (force && actor && !actor.isOwner && ehMercador(actor)) {
+			abrirLoja(actor);
+			return this;
+		}
+		return wrapped(force, ...args);
+	};
+	if (game.modules.get("lib-wrapper")?.active) {
+		libWrapper.register(MODULE_ID, alvo, wrapper, "MIXED");
+		return;
+	}
+	const proto = foundry.appv1.sheets.ActorSheet.prototype;
+	const original = proto.render;
+	proto.render = function (force, ...args) {
+		return wrapper.call(this, (...a) => original.apply(this, a), force, ...args);
 	};
 }
 
